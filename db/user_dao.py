@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from db.connection import Base, get_session
+from db.connection import Base, get_db
 
 class UserORM(Base):
     __tablename__ = 'users'
@@ -11,7 +11,7 @@ class UserORM(Base):
 
 
 def create_user(name: str, lastname: str, membershipId: str) -> None:
-    session = get_session()
+    session = get_db()
     existing = session.query(UserORM).filter_by(membershipId=membershipId).first()
     if existing:
         print(f"  User with membership ID {membershipId} already exists.")
@@ -22,7 +22,7 @@ def create_user(name: str, lastname: str, membershipId: str) -> None:
     session.close()
 
 def get_users():
-    session = get_session()
+    session = get_db()
     users = session.query(UserORM).all()
     session.close()
     return users
