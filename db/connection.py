@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# URL za SQLite bazu (možeš promijeniti na PostgreSQL/MySQL ako bude trebalo)
+# URL za SQLite bazu
 DATABASE_URL = "sqlite:///./library.db"
 
 # Engine za konekciju
@@ -15,7 +15,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Bazna klasa za modele
 Base = declarative_base()
 
-# Funkcija za dobavljanje sesije (koristi se u Depends)
+# Funkcija za dobavljanje sesije
 def get_db():
     db = SessionLocal()
     try:
