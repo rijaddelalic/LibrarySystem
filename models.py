@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from db.connection import Base
 
@@ -9,7 +9,6 @@ class User(Base):
     lastname = Column(String, nullable=False)
     membershipId = Column(String, unique=True, index=True, nullable=False)
 
-    # lista posuđenih knjiga
     loaned_books = relationship("Loan", back_populates="user")
 
 class Book(Base):
@@ -24,8 +23,9 @@ class Book(Base):
 class Loan(Base):
     __tablename__ = "loans"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    book_id = Column(Integer, ForeignKey("books.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
+    return_date = Column(Date, nullable=True, default=None)  # bitno!
 
     user = relationship("User", back_populates="loaned_books")
     book = relationship("Book", back_populates="loaned_books")
