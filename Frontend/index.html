@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LibroFlow | Sistem za Biblioteku</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1><i class="fas fa-book-reader"></i> LibroFlow</h1>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showSection('books', this)">Knjige</button>
+            <button class="tab-btn" onclick="showSection('users', this)">Članovi</button>
+            <button class="tab-btn" onclick="showSection('loans', this)">Iznajmljivanja</button>
+        </div>
+    </header>
+
+    <!-- SEKCIJA KNJIGE -->
+    <div id="books-section" class="section">
+        <div class="card">
+            <h3><i class="fas fa-plus-circle"></i> Dodaj novu knjigu</h3>
+            <div class="form-group">
+                <input type="text" id="title" placeholder="Naslov knjige...">
+                <input type="text" id="author" placeholder="Autor...">
+                <input type="number" id="year" placeholder="Godina...">
+                <button onclick="addBook()" class="btn-primary"><i class="fas fa-save"></i> Spasi</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Naslov</th>
+                    <th>Autor</th>
+                    <th>Godina</th>
+                    <th style="text-align: right;">Akcije</th>
+                </tr>
+                </thead>
+                <tbody id="book-table"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SEKCIJA ČLANOVI -->
+    <div id="users-section" class="section" style="display: none;">
+        <div class="card">
+            <h3><i class="fas fa-user-plus"></i> Registruj novog člana</h3>
+            <div class="form-group">
+                <input type="text" id="userName" placeholder="Ime...">
+                <input type="text" id="userLastname" placeholder="Prezime...">
+                <input type="text" id="membershipId" placeholder="ID Članske karte...">
+                <button onclick="addUser()" class="btn-primary"><i class="fas fa-user-check"></i> Registruj</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Ime i prezime</th>
+                    <th>Članska karta</th>
+                    <th style="text-align: right;">Akcije</th>
+                </tr>
+                </thead>
+                <tbody id="user-table"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SEKCIJA IZNAJMLJIVANJA -->
+    <div id="loans-section" class="section" style="display: none;">
+        <div class="card">
+            <h3><i class="fas fa-hand-holding"></i> Novo iznajmljivanje</h3>
+            <div class="form-group">
+                <select id="loanUserSelect"><option value="">Izaberi člana...</option></select>
+                <select id="loanBookSelect"><option value="">Izaberi knjigu...</option></select>
+                <button onclick="addLoan()" class="btn-primary">Iznajmi</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Član (ID)</th>
+                    <th>Knjiga (ID)</th>
+                    <th style="text-align: right;">Status</th>
+                </tr>
+                </thead>
+                <tbody id="loan-table"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 LibroFlow v1.0 | Backend: FastAPI | Frontend: JS/CSS</p>
+    </footer>
+</div>
+
+<script src="index.js"></script>
+</body>
+</html>
