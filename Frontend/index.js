@@ -211,46 +211,95 @@ async function addLoan() {
     const uId = isAdmin ? document.getElementById("loanUserSelect").value : currentUser.id;
     const bId = document.getElementById("loanBookSelect").value;
 
-    if(!bId) return alert("Nema dostupne knjige!");
+    if(!bId || !uId) return alert("Izaberite sve podatke!");
 
-    const res = await fetch(`${API_URL}/loans/`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({user_id: uId, book_id: bId})});
+    const res = await fetch(`${API_URL}/loans/`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({user_id: parseInt(uId), book_id: parseInt(bId)})
+    });
+
     if(res.ok) {
-        alert("Zaduženo!");
+        alert("Knjiga uspješno zadužena!");
+        // OSVJEŽI PRIKAZ
         fetchLoans();
         if(isAdmin) updateStats();
     } else {
-        const e = await res.json(); alert(e.detail);
+        const e = await res.json();
+        alert("Greška: " + e.detail);
     }
 }
-
 async function fetchLoans() {
-    const res = await fetch(`${API_URL}/loans/`);
-    const loans = await res.json();
-    const table = document.getElementById("loan-table");
-    if(!table) return;
+    try {
+        // 1. Povuci sve potrebne podatke paralelno (brže je)
+        const [loansRes, usersRes, booksRes] = await Promise.all([
+            fetch(`${API_URL}/loans/`),
+            fetch(`${API_URL}/users/`),
+            fetch(`${API_URL}/books/`)
+        ]);
 
-    table.innerHTML = "";
+        const loans = await loansRes.json();
+        const users = await usersRes.json();
+        const books = await booksRes.json();
 
-    // Filtriranje: Admin vidi sve, User vidi SAMO SVOJE
-    const loansToShow = isAdmin ? loans : loans.filter(l => l.user_id === currentUser.id);
+        const table = document.getElementById("loan-table");
+        if(!table) return;
+        table.innerHTML = "";
 
-    if (loansToShow.length === 0) {
-        table.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">Nemate zaduženih knjiga.</td></tr>`;
-        return;
+        // 2. Filtriraj: Admin vidi sve, User vidi samo svoje
+        const loansToShow = isAdmin ? loans : loans.filter(l => l.user_id === currentUser.id);
+
+        if (loansToShow.length === 0) {
+            table.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888; padding: 20px;">Nema aktivnih zaduženja.</td></tr>`;
+            return;
+        }
+
+        // 3. Prođi kroz svako zaduženje i "pronađi" pravu osobu i knjigu
+        loansToShow.forEach(l => {
+            const user = users.find(u => u.id === l.user_id);
+            const book = books.find(b => b.id === l.book_id);
+
+            // Ako su podaci slučajno obrisani iz baze, stavi zamjenski tekst
+            const userName = user ? `${user.name} ${user.lastname}` : "Nepoznat korisnik";
+            const bookTitle = book ? book.title : "Nepoznata knjiga";
+            const bookImg = book && book.image_filename ? `${API_URL}/${book.image_filename}` : 'https://via.placeholder.com/30x40?text=X';
+
+            // Formatiranje datuma (Timestamp)
+            const dateObj = new Date(l.timestamp);
+            const formattedDate = dateObj.toLocaleDateString('hr-BA') + " u " + dateObj.toLocaleTimeString('hr-BA', {hour: '2-digit', minute:'2-digit'});
+
+            const actionBtn = isAdmin || l.user_id === currentUser.id
+                ? `<button onclick="deleteLoan(${l.id})" class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">
+                    <i class="fas fa-undo"></i> Vrati knjigu
+                   </button>`
+                : `<span class="status-badge status-rented">ZADUŽENO</span>`;
+
+            table.innerHTML += `
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-user-circle" style="color:#ccc;"></i>
+                            <div>
+                                <strong>${userName}</strong><br>
+                                <small style="color:#888;">${user ? user.membershipId : 'Nema ID'}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${bookImg}" style="width:30px; height:40px; object-fit:cover; border-radius:3px;">
+                            <div>
+                                <strong>${bookTitle}</strong><br>
+                                <small style="color:#888;"><i class="far fa-calendar-alt"></i> ${formattedDate}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-right">${actionBtn}</td>
+                </tr>`;
+        });
+    } catch (e) {
+        console.error("Greška pri mapiranju zaduženja:", e);
     }
-
-    loansToShow.forEach(l => {
-        // I admin i vlasnik knjige mogu kliknuti "Vrati"
-        const returnBtn = `<button onclick="deleteLoan(${l.id})" class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">
-            <i class="fas fa-undo"></i> Vrati knjigu
-        </button>`;
-
-        table.innerHTML += `<tr>
-            <td>ID Korisnika: ${l.user_id}</td>
-            <td>ID Knjige: ${l.book_id}</td>
-            <td class="text-right">${returnBtn}</td>
-        </tr>`;
-    });
 }
 
 async function deleteLoan(id) {
