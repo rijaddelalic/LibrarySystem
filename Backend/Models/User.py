@@ -1,20 +1,13 @@
-from typing import List
+from sqlalchemy import Column, Integer, String
+from db.connection import Base  # OVO JE FALILO
 
-class User:
-    def __init__(self,name:str,lastname:str,membershipId:str)->None:
-        self.name = name
-        self.lastname = lastname
-        self.membershipId = membershipId
-        self.loaned_books:List[str] = []
+class User(Base):
+    __tablename__ = "users"
+    __table_args__ = {'extend_existing': True}
 
-    def Loan_Book(self,title:str)->None:
-        self.loaned_books.append(title)
-
-    def Return_Book(self,title:str)->None:
-        if title in self.loaned_books:
-            self.loaned_books.remove(title)
-
-
-    def __str__(self)->str:
-        return f"{self.name.upper()} {self.lastname.upper()} (ID: {self.membershipId})"
-
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    lastname = Column(String)
+    membershipId = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True) # Mora biti email (ne mail)
+    password = Column(String)

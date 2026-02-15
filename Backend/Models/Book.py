@@ -1,8 +1,12 @@
-class Book:
-    def __init__(self,title:str,author:str,year:int)->None:
-        self.title = title
-        self.author = author
-        self.year = year
+from sqlalchemy import Column, Integer, String
+from db.connection import Base
 
-    def __str__(self)->str:
-        return f"{self.title} by {self.author} on {self.year}"
+class Book(Base):
+    __tablename__ = "books"
+    __table_args__ = {'extend_existing': True} # Ovo rješava "already defined" grešku
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    author = Column(String)
+    year = Column(Integer)
+    image_filename = Column(String, nullable=True) # Ovako se mora zvati kolona

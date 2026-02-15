@@ -1,52 +1,45 @@
-from fastapi import APIRouter, Depends, HTTPException
+import shutil
+import os
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from models import Book, Loan
+from Models.Book import Book # ISPRAVLJENA PUTANJA
 from db.connection import get_db
-from Schemas.schemas import BookCreate, BookOut
+from Schemas.schemas import BookOut
 
 router = APIRouter(prefix="/books", tags=["books"])
 
-# CREATE
 @router.post("/", response_model=BookOut)
-def add_book(book: BookCreate, db: Session = Depends(get_db)):
-    new_book = Book(**book.dict())
+def add_book(
+        title: str = Form(...),
+        author: str = Form(...),
+        year: int = Form(...),
+        image: UploadFile = File(None),
+        db: Session = Depends(get_db)
+):
+    path_for_db = None
+    if image:
+        # Spasavamo sliku u static/images
+        filename = f"static/images/{image.filename}"
+        with open(filename, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        path_for_db = filename
+
+    new_book = Book(title=title, author=author, year=year, image_filename=path_for_db)
     db.add(new_book)
     db.commit()
     db.refresh(new_book)
     return new_book
 
-# READ
 @router.get("/", response_model=list[BookOut])
 def list_books(db: Session = Depends(get_db)):
     return db.query(Book).all()
 
-# UPDATE
-@router.put("/{book_id}", response_model=BookOut)
-def update_book(book_id: int, updated_book: BookCreate, db: Session = Depends(get_db)):
-    book = db.query(Book).filter(Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    for key, value in updated_book.dict().items():
-        setattr(book, key, value)
-    db.commit()
-    db.refresh(book)
-    return book
-
-# DELETE
 @router.delete("/{book_id}")
 def delete_book(book_id: int, db: Session = Depends(get_db)):
     book = db.query(Book).filter(Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
+    if not book: raise HTTPException(status_code=404)
+    if book.image_filename and os.path.exists(book.image_filename):
+        os.remove(book.image_filename)
     db.delete(book)
     db.commit()
-    return {"message": "Book deleted successfully"}
-
-# AVAILABILITY
-@router.get("/{book_id}/availability")
-def check_availability(book_id: int, db: Session = Depends(get_db)):
-    book = db.query(Book).filter(Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    loan = db.query(Loan).filter(Loan.book_id == book_id).first()
-    return {"book_id": book_id, "available": loan is None}
+    return {"message": "Deleted"}
