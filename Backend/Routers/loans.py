@@ -39,3 +39,9 @@ def delete_loan(loan_id: int, db: Session = Depends(get_db)):
     db.delete(loan)
     db.commit()
     return {"message": "Deleted"}
+
+# Ova ruta vraća SVE transakcije (i vraćene i aktivne) za Admina
+@router.get("/history")
+def get_loan_history(db: Session = Depends(get_db)):
+    # Vraća sve zapise iz tabele loans
+    return db.query(Loan).order_by(Loan.timestamp.desc()).all()

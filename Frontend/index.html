@@ -3,33 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LibroFlow</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>LibroFlow | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH SCREEN (Login/Register) -->
 <div id="auth-screen" class="auth-wrapper">
     <div class="auth-container">
         <div class="auth-left">
-            <div class="brand"><i class="fas fa-book-open"></i> <span>LibroFlow</span></div>
+            <div class="brand"><i class="fas fa-book-reader"></i> <span>LibroFlow</span></div>
             <h2>Dobrodošli</h2>
-            <p>Vaša moderna biblioteka.</p>
+            <p>Digitalno srce vaše biblioteke.</p>
         </div>
         <div class="auth-right">
             <div class="auth-tabs">
                 <button id="tab-login" class="active" onclick="switchAuth('login')">Prijava</button>
                 <button id="tab-register" onclick="switchAuth('register')">Registracija</button>
             </div>
-            <!-- LOGIN -->
             <div id="login-form" class="form-content">
                 <div class="input-group"><i class="far fa-envelope"></i><input type="email" id="loginEmail" placeholder="Email adresa"></div>
                 <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="loginPass" placeholder="Lozinka"></div>
                 <button onclick="handleLogin()" class="btn-primary full-width">Prijavi se</button>
             </div>
-            <!-- REGISTER -->
             <div id="register-form" class="form-content" style="display: none;">
                 <div class="row">
                     <div class="input-group"><input type="text" id="regName" placeholder="Ime"></div>
@@ -44,98 +42,111 @@
     </div>
 </div>
 
-<!-- APP SCREEN -->
+<!-- MAIN APP SCREEN -->
 <div id="app-screen" class="app-wrapper" style="display: none;">
+
     <!-- SIDEBAR -->
     <aside class="sidebar">
-        <div class="logo"><i class="fas fa-book-reader"></i> LibroFlow</div>
-        <nav class="side-nav">
-            <button class="nav-item active" onclick="showSection('books', this)"><i class="fas fa-book"></i> Katalog</button>
-            <button class="nav-item admin-only" onclick="showSection('users', this)"><i class="fas fa-users"></i> Članovi</button>
-            <button class="nav-item" onclick="showSection('loans', this)"><i class="fas fa-hand-holding-heart"></i> Iznajmljivanja</button>
-        </nav>
-        <div class="user-profile">
-            <div class="avatar"><i class="fas fa-user"></i></div>
-            <div class="user-info">
-                <span id="user-display">Korisnik</span>
-                <small onclick="location.reload()" class="logout-link">Odjavi se</small>
+        <div class="sidebar-top">
+            <div class="logo"><i class="fas fa-book-open"></i> LibroFlow</div>
+            <nav class="side-nav">
+                <button class="nav-item active" onclick="showSection('books', this)"><i class="fas fa-th-large"></i> Katalog</button>
+                <button class="nav-item admin-only" onclick="showSection('users', this)"><i class="fas fa-users"></i> Članovi</button>
+                <button class="nav-item" onclick="showSection('loans', this)"><i class="fas fa-exchange-alt"></i> Iznajmljivanja</button>
+                <button class="nav-item admin-only" onclick="showSection('history', this)"><i class="fas fa-history"></i> Istorija</button>
+            </nav>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="theme-switch" onclick="toggleTheme()">
+                <i id="theme-icon" class="fas fa-moon"></i> <span id="theme-text">Dark Mode</span>
+            </div>
+            <div class="user-card">
+                <div class="avatar"><i class="fas fa-user"></i></div>
+                <div class="u-info">
+                    <span id="user-display">Korisnik</span>
+                    <small onclick="location.reload()" class="logout-link">Odjavi se</small>
+                </div>
             </div>
         </div>
     </aside>
 
-    <!-- CONTENT -->
+    <!-- MAIN CONTENT -->
     <main class="main-content">
 
-        <!-- ADMIN STATS (Samo za admina, JS kontroliše display) -->
-        <div id="admin-stats" class="stats-header" style="display: none;">
-            <div class="stat-box"><div class="icon blue"><i class="fas fa-book"></i></div><div><h3><span id="stat-books">0</span></h3><p>Knjiga</p></div></div>
-            <div class="stat-box"><div class="icon green"><i class="fas fa-users"></i></div><div><h3><span id="stat-users">0</span></h3><p>Članova</p></div></div>
-            <div class="stat-box"><div class="icon purple"><i class="fas fa-exchange-alt"></i></div><div><h3><span id="stat-loans">0</span></h3><p>Zaduženo</p></div></div>
+        <!-- ADMIN STATS -->
+        <div id="admin-stats" class="stats-grid" style="display: none;">
+            <div class="stat-card blue"><div class="s-icon"><i class="fas fa-book"></i></div><div><h3 id="stat-books">0</h3><p>Knjiga</p></div></div>
+            <div class="stat-card green"><div class="s-icon"><i class="fas fa-users"></i></div><div><h3 id="stat-users">0</h3><p>Članova</p></div></div>
+            <div class="stat-card purple"><div class="s-icon"><i class="fas fa-clock"></i></div><div><h3 id="stat-loans">0</h3><p>Aktivno</p></div></div>
         </div>
 
-        <!-- KNJIGE -->
-        <div id="books-section" class="section">
+        <!-- SECTIONS -->
+        <div id="content-area">
 
-            <!-- ADMIN FORMA ZA DODAVANJE (POPRAVLJENA) -->
-            <div class="add-form-card admin-only">
-                <h4><i class="fas fa-plus-circle"></i> Nova Knjiga</h4>
-                <div class="form-row">
-                    <input type="text" id="title" placeholder="Naslov knjige">
-                    <input type="text" id="author" placeholder="Autor">
-                    <input type="text" id="year" placeholder="Godina" style="max-width: 100px;">
-
-                    <label for="bookImage" class="file-upload-label">
-                        <i class="fas fa-image"></i> Izaberi sliku
-                    </label>
-                    <input type="file" id="bookImage" style="display:none">
-
-                    <button onclick="addBook()" class="btn-primary" style="margin-left: auto;">Spasi Knjigu</button>
+            <!-- KNJIGE -->
+            <div id="books-section" class="section">
+                <div class="add-form-card admin-only">
+                    <h4><i class="fas fa-plus-circle"></i> Nova Knjiga</h4>
+                    <div class="form-row">
+                        <input type="text" id="title" placeholder="Naslov">
+                        <input type="text" id="author" placeholder="Autor">
+                        <input type="text" id="year" placeholder="God." style="width: 80px;">
+                        <label for="bookImage" class="file-btn"><i class="fas fa-image"></i> Slika</label>
+                        <input type="file" id="bookImage" style="display:none">
+                        <button onclick="addBook()" class="btn-primary">Spasi</button>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <div class="search-wrap"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Pretraži katalog..." onkeyup="filterBooks()"></div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Korice</th><th>Naslov</th><th>Autor</th><th>Godina</th><th class="text-right">Status</th></tr></thead>
+                        <tbody id="book-table"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="action-bar">
-                <div class="search-wrap">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Pretraži naslov ili autora..." onkeyup="filterBooks()">
+            <!-- ČLANOVI -->
+            <div id="users-section" class="section" style="display: none;">
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Ime i Prezime</th><th>Email</th><th>Članska ID</th><th class="text-right">Akcije</th></tr></thead>
+                        <tbody id="user-table"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Korice</th><th>Naslov</th><th>Autor</th><th>Godina</th><th class="text-right">Status/Akcija</th></tr></thead>
-                    <tbody id="book-table"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- KORISNICI -->
-        <div id="users-section" class="section" style="display: none;">
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Ime i Prezime</th><th>Email</th><th>Članska Karta</th><th class="text-right">Opcije</th></tr></thead>
-                    <tbody id="user-table"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- POSUDBE -->
-        <div id="loans-section" class="section" style="display: none;">
-            <div class="add-form-card admin-only">
-                <h4>Nova Posudba</h4>
-                <div class="form-row">
-                    <select id="loanUserSelect" style="flex: 2;"></select>
-                    <select id="loanBookSelect" style="flex: 2;"></select>
-                    <button onclick="addLoan()" class="btn-primary">Zaduži</button>
+            <!-- IZNAJMLJIVANJA -->
+            <div id="loans-section" class="section" style="display: none;">
+                <div class="add-form-card">
+                    <h4>Brzo zaduživanje</h4>
+                    <div class="form-row">
+                        <select id="loanUserSelect" class="admin-only"></select>
+                        <select id="loanBookSelect"></select>
+                        <button onclick="addLoan()" class="btn-primary">Potvrdi</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Član</th><th>Knjiga</th><th class="text-right">Akcija</th></tr></thead>
+                        <tbody id="loan-table"></tbody>
+                    </table>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Korisnik</th><th>Knjiga</th><th class="text-right">Akcija</th></tr></thead>
-                    <tbody id="loan-table"></tbody>
-                </table>
-            </div>
-        </div>
 
+            <!-- ISTORIJA -->
+            <div id="history-section" class="section" style="display: none;">
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Korisnik</th><th>Knjiga</th><th>Datum</th><th class="text-right">Tip</th></tr></thead>
+                        <tbody id="history-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
     </main>
 </div>
 
