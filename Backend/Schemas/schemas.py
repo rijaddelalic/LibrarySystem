@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-# --- BOOK SCHEMAS ---
 class BookBase(BaseModel):
     title: str
     author: str
@@ -10,28 +9,30 @@ class BookBase(BaseModel):
 class BookOut(BookBase):
     id: int
     image_filename: str | None = None
-
     class Config:
         from_attributes = True
 
-# --- USER SCHEMAS ---
-class UserBase(BaseModel):
+class UserCreate(BaseModel):
     name: str
     lastname: str
-    membershipId: str
-    email: str  # PROMIJENIO SAM 'mail' u 'email' da se poklapa sa JS-om
-
-class UserCreate(UserBase):
+    email: str
     password: str
+    membershipId: str | None = None
 
-class UserOut(UserBase):
+class UserOut(BaseModel):
     id: int
-    # UserOut NE nasljeđuje UserCreate da ne bi slao lozinku nazad!
-
+    name: str
+    lastname: str
+    email: str
+    membershipId: str
+    profile_image: str | None = None
     class Config:
         from_attributes = True
 
-# --- LOAN SCHEMAS ---
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 class LoanCreate(BaseModel):
     user_id: int
     book_id: int
@@ -40,6 +41,5 @@ class LoanOut(LoanCreate):
     id: int
     timestamp: datetime | None = None
     return_date: datetime | None = None
-
     class Config:
         from_attributes = True

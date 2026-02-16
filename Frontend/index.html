@@ -3,149 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LibroFlow | Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>LibroFlow Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-theme">
 
-<!-- AUTH SCREEN (Login/Register) -->
+<div id="toast-container"></div>
+
+<!-- RESET PASSWORD MODAL -->
+<div id="reset-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+        <h3>Reset Lozinke</h3>
+        <p>Unesite podatke za potvrdu identiteta.</p>
+        <input type="email" id="res-email" placeholder="Vaš Email">
+        <input type="text" id="res-mid" placeholder="Članski ID (IB-00...)">
+        <input type="password" id="res-new-pw" placeholder="Nova lozinka">
+        <div class="modal-actions">
+            <button onclick="closeResetModal()" class="btn-ghost">Otkaži</button>
+            <button onclick="confirmReset()" class="btn-main">Resetuj</button>
+        </div>
+    </div>
+</div>
+
+<!-- AUTH -->
 <div id="auth-screen" class="auth-wrapper">
-    <div class="auth-container">
+    <div class="auth-card">
         <div class="auth-left">
-            <div class="brand"><i class="fas fa-book-reader"></i> <span>LibroFlow</span></div>
-            <h2>Dobrodošli</h2>
-            <p>Digitalno srce vaše biblioteke.</p>
+            <h2>LibroFlow.</h2>
+            <p>Digitalna revolucija u vašoj biblioteci.</p>
         </div>
         <div class="auth-right">
             <div class="auth-tabs">
-                <button id="tab-login" class="active" onclick="switchAuth('login')">Prijava</button>
-                <button id="tab-register" onclick="switchAuth('register')">Registracija</button>
+                <button id="t-login" class="active" onclick="switchAuth('login')">Prijava</button>
+                <button id="t-register" onclick="switchAuth('register')">Registracija</button>
             </div>
-            <div id="login-form" class="form-content">
-                <div class="input-group"><i class="far fa-envelope"></i><input type="email" id="loginEmail" placeholder="Email adresa"></div>
-                <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="loginPass" placeholder="Lozinka"></div>
-                <button onclick="handleLogin()" class="btn-primary full-width">Prijavi se</button>
+            <div id="f-login">
+                <input type="email" id="l-email" placeholder="Email">
+                <input type="password" id="l-pass" placeholder="Lozinka">
+                <p class="forgot-text" onclick="openResetModal()">Zaboravljena lozinka?</p>
+                <button onclick="handleLogin()" class="btn-main" style="width:100%">Prijavi se</button>
             </div>
-            <div id="register-form" class="form-content" style="display: none;">
-                <div class="row">
-                    <div class="input-group"><input type="text" id="regName" placeholder="Ime"></div>
-                    <div class="input-group"><input type="text" id="regLastname" placeholder="Prezime"></div>
+            <div id="f-register" style="display:none">
+                <div style="display:flex; gap:10px; margin-bottom:12px">
+                    <input type="text" id="r-name" placeholder="Ime" style="margin:0"><input type="text" id="r-last" placeholder="Prezime" style="margin:0">
                 </div>
-                <div class="input-group"><i class="fas fa-id-card"></i><input type="text" id="regMemberId" placeholder="Broj članske karte"></div>
-                <div class="input-group"><i class="far fa-envelope"></i><input type="email" id="regEmail" placeholder="Email adresa"></div>
-                <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="Lozinka"></div>
-                <button onclick="handleRegister()" class="btn-primary full-width">Kreiraj nalog</button>
+                <input type="email" id="r-email" placeholder="Email"><input type="password" id="r-pass" placeholder="Lozinka">
+                <input type="file" id="r-img" style="font-size:0.8rem">
+                <button onclick="handleRegister()" class="btn-main" style="width:100%; margin-top:15px">Registruj se</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MAIN APP SCREEN -->
-<div id="app-screen" class="app-wrapper" style="display: none;">
-
-    <!-- SIDEBAR -->
+<!-- APP -->
+<div id="app-screen" class="app-layout" style="display:none">
     <aside class="sidebar">
-        <div class="sidebar-top">
-            <div class="logo"><i class="fas fa-book-open"></i> LibroFlow</div>
-            <nav class="side-nav">
-                <button class="nav-item active" onclick="showSection('books', this)"><i class="fas fa-th-large"></i> Katalog</button>
-                <button class="nav-item admin-only" onclick="showSection('users', this)"><i class="fas fa-users"></i> Članovi</button>
-                <button class="nav-item" onclick="showSection('loans', this)"><i class="fas fa-exchange-alt"></i> Iznajmljivanja</button>
-                <button class="nav-item admin-only" onclick="showSection('history', this)"><i class="fas fa-history"></i> Istorija</button>
-            </nav>
-        </div>
-
-        <div class="sidebar-bottom">
-            <div class="theme-switch" onclick="toggleTheme()">
-                <i id="theme-icon" class="fas fa-moon"></i> <span id="theme-text">Dark Mode</span>
+        <div class="side-logo-box"><i class="fas fa-book-open"></i> LibroFlow</div>
+        <nav class="side-nav">
+            <div class="nav-link active" onclick="showSection('books', this)"><i class="fas fa-th-large"></i> Katalog</div>
+            <div class="nav-link admin-only" onclick="showSection('users', this)"><i class="fas fa-users"></i> Članovi</div>
+            <div class="nav-link" onclick="showSection('loans', this)"><i class="fas fa-exchange-alt"></i> Zaduženja</div>
+            <div class="nav-link" onclick="showSection('history', this)"><i class="fas fa-history"></i> Arhiva</div>
+            <div class="nav-link" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> Postavke</div>
+        </nav>
+        <div class="sidebar-user-box">
+            <img id="u-avatar" src="" class="avatar-circle">
+            <div class="user-meta-info">
+                <b id="u-display">...</b>
+                <small id="u-id">...</small>
             </div>
-            <div class="user-card">
-                <div class="avatar"><i class="fas fa-user"></i></div>
-                <div class="u-info">
-                    <span id="user-display">Korisnik</span>
-                    <small onclick="location.reload()" class="logout-link">Odjavi se</small>
-                </div>
-            </div>
+            <i class="fas fa-sign-out-alt logout-btn" onclick="location.reload()"></i>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="main-content">
-
-        <!-- ADMIN STATS -->
-        <div id="admin-stats" class="stats-grid" style="display: none;">
-            <div class="stat-card blue"><div class="s-icon"><i class="fas fa-book"></i></div><div><h3 id="stat-books">0</h3><p>Knjiga</p></div></div>
-            <div class="stat-card green"><div class="s-icon"><i class="fas fa-users"></i></div><div><h3 id="stat-users">0</h3><p>Članova</p></div></div>
-            <div class="stat-card purple"><div class="s-icon"><i class="fas fa-clock"></i></div><div><h3 id="stat-loans">0</h3><p>Aktivno</p></div></div>
+        <div id="admin-stats" class="stats-container admin-only" style="display:none">
+            <div class="stat-card blue"><div class="s-icon"><i class="fas fa-book"></i></div><div class="s-data"><h3 id="st-books">0</h3><p>Knjiga</p></div></div>
+            <div class="stat-card green"><div class="s-icon"><i class="fas fa-users"></i></div><div class="s-data"><h3 id="st-users">0</h3><p>Članova</p></div></div>
+            <div class="stat-card purple"><div class="s-icon"><i class="fas fa-clock"></i></div><div class="s-data"><h3 id="st-loans">0</h3><p>Aktivno</p></div></div>
         </div>
 
-        <!-- SECTIONS -->
         <div id="content-area">
-
-            <!-- KNJIGE -->
             <div id="books-section" class="section">
-                <div class="add-form-card admin-only">
-                    <h4><i class="fas fa-plus-circle"></i> Nova Knjiga</h4>
-                    <div class="form-row">
-                        <input type="text" id="title" placeholder="Naslov">
-                        <input type="text" id="author" placeholder="Autor">
-                        <input type="text" id="year" placeholder="God." style="width: 80px;">
-                        <label for="bookImage" class="file-btn"><i class="fas fa-image"></i> Slika</label>
-                        <input type="file" id="bookImage" style="display:none">
-                        <button onclick="addBook()" class="btn-primary">Spasi</button>
-                    </div>
-                </div>
-                <div class="action-bar">
-                    <div class="search-wrap"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Pretraži katalog..." onkeyup="filterBooks()"></div>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead><tr><th>Korice</th><th>Naslov</th><th>Autor</th><th>Godina</th><th class="text-right">Status</th></tr></thead>
-                        <tbody id="book-table"></tbody>
-                    </table>
-                </div>
+                <div class="flex-between mb-30"><div class="search-box"><i class="fas fa-search"></i><input type="text" id="q" placeholder="Pretraži..." onkeyup="filterBooks()"></div><button class="btn-main admin-only" onclick="toggleAddBox()">+ Nova Knjiga</button></div>
+                <div id="add-box" class="card admin-only mb-30" style="display:none; border-style:dashed"><div style="display:flex; gap:10px"><input type="text" id="b-title" placeholder="Naslov"><input type="text" id="b-author" placeholder="Autor"><input type="number" id="b-year" placeholder="Godina" style="width:100px"><input type="file" id="b-img"><button onclick="addBook()" class="btn-main">Spremi</button></div></div>
+                <div class="book-grid" id="book-grid"></div>
             </div>
 
-            <!-- ČLANOVI -->
-            <div id="users-section" class="section" style="display: none;">
-                <div class="table-responsive">
-                    <table>
-                        <thead><tr><th>Ime i Prezime</th><th>Email</th><th>Članska ID</th><th class="text-right">Akcije</th></tr></thead>
-                        <tbody id="user-table"></tbody>
-                    </table>
+            <div id="users-section" class="section" style="display:none"><div class="table-card"><table><thead><tr><th>Ime</th><th>Email</th><th>Članska ID</th><th>Akcije</th></tr></thead><tbody id="user-table"></tbody></table></div></div>
+            <div id="loans-section" class="section" style="display:none"><div class="table-card"><table><thead><tr><th>Korisnik</th><th>Knjiga</th><th>Datum</th><th style="text-align:right">Akcija</th></tr></thead><tbody id="loan-table"></tbody></table></div></div>
+            <div id="history-section" class="section" style="display:none"><div class="table-card"><table><thead><tr><th>Korisnik</th><th>Knjiga</th><th>Datum</th><th>Status</th></tr></thead><tbody id="history-table"></tbody></table></div></div>
+            <div id="settings-section" class="section" style="display:none">
+                <div class="card" style="max-width:500px">
+                    <h3>Sigurnost</h3>
+                    <input type="password" id="s-old" placeholder="Trenutna lozinka">
+                    <input type="password" id="s-new" placeholder="Nova lozinka">
+                    <button onclick="changePass()" class="btn-main" style="width:100%">Promijeni lozinku</button>
+                    <hr style="margin:30px 0; border:0; border-top:1px solid var(--border)">
+                    <h3>Izgled</h3>
+                    <button onclick="toggleTheme()" class="btn-main" style="background:#444; width:100%">Prebaci Temu</button>
                 </div>
             </div>
-
-            <!-- IZNAJMLJIVANJA -->
-            <div id="loans-section" class="section" style="display: none;">
-                <div class="add-form-card">
-                    <h4>Brzo zaduživanje</h4>
-                    <div class="form-row">
-                        <select id="loanUserSelect" class="admin-only"></select>
-                        <select id="loanBookSelect"></select>
-                        <button onclick="addLoan()" class="btn-primary">Potvrdi</button>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead><tr><th>Član</th><th>Knjiga</th><th class="text-right">Akcija</th></tr></thead>
-                        <tbody id="loan-table"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- ISTORIJA -->
-            <div id="history-section" class="section" style="display: none;">
-                <div class="table-responsive">
-                    <table>
-                        <thead><tr><th>Korisnik</th><th>Knjiga</th><th>Datum</th><th class="text-right">Tip</th></tr></thead>
-                        <tbody id="history-table"></tbody>
-                    </table>
-                </div>
-            </div>
-
         </div>
     </main>
 </div>

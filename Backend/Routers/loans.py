@@ -1,47 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-from Models.Loan import Loan  # Pazi na veliko L
-from Models.User import User
-from Models.Book import Book
+from Models.Loan import Loan
 from db.connection import get_db
 from Schemas.schemas import LoanCreate, LoanOut
 
 router = APIRouter(prefix="/loans", tags=["loans"])
 
 @router.post("/", response_model=LoanOut)
-def loan_book(loan: LoanCreate, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == loan.user_id).first()
-    book = db.query(Book).filter(Book.id == loan.book_id).first()
-
-    if not user or not book:
-        raise HTTPException(status_code=404, detail="Korisnik ili Knjiga nisu pronađeni")
-
-    new_loan = Loan(
-        user_id=loan.user_id,
-        book_id=loan.book_id,
-        timestamp=datetime.now()
-    )
-    db.add(new_loan)
-    db.commit()
-    db.refresh(new_loan)
-    return new_loan
+def create_loan(loan: LoanCreate, db: Session = Depends(get_db)):
+    new_l = Loan(user_id=loan.user_id, book_id=loan.book_id, timestamp=datetime.now())
+    db.add(new_l); db.commit(); db.refresh(new_l)
+    return new_l
 
 @router.get("/", response_model=list[LoanOut])
-def list_loans(db: Session = Depends(get_db)):
+def active_loans(db: Session = Depends(get_db)):
+    return db.query(Loan).filter(Loan.return_date == None).all()
+
+@router.get("/history", response_model=list[LoanOut])
+def loan_history(db: Session = Depends(get_db)):
     return db.query(Loan).all()
 
 @router.delete("/{loan_id}")
-def delete_loan(loan_id: int, db: Session = Depends(get_db)):
+def return_book(loan_id: int, db: Session = Depends(get_db)):
     loan = db.query(Loan).filter(Loan.id == loan_id).first()
-    if not loan:
-        raise HTTPException(status_code=404, detail="Posudba nije pronađena")
-    db.delete(loan)
+    loan.return_date = datetime.now() # Ne brišemo, samo stavljamo datum povratka
     db.commit()
-    return {"message": "Deleted"}
-
-# Ova ruta vraća SVE transakcije (i vraćene i aktivne) za Admina
-@router.get("/history")
-def get_loan_history(db: Session = Depends(get_db)):
-    # Vraća sve zapise iz tabele loans
-    return db.query(Loan).order_by(Loan.timestamp.desc()).all()
+    return {"msg": "returned"}
